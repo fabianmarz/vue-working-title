@@ -2,5 +2,8 @@
   <router-view/>
 </template>
 
-<style lang="scss">
+<style>
+  * {
+    box-sizing: border-box;
+  }
 </style>
