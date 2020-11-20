@@ -1,7 +1,8 @@
 <template>
   <div class="container">
     <van-form @submit="login">
-      <van-field v-model="username"
+      <van-field
+        v-model="username"
         name="Username"
         placeholder="Username"
         :rules="[{ required: true, message: 'Username is required' }]"
@@ -13,20 +14,37 @@
         placeholder="Password"
         :rules="[{ required: true, message: 'Password is required' }]"
       />
-      <van-button type="primary" block native-type="submit">Login</van-button>
+      <van-button
+        type="primary"
+        block
+        native-type="submit"
+      >
+        Login
+      </van-button>
+      <van-button
+        icon="plus"
+        type="info"
+        block
+        @click="loginWithGoogle"
+      >
+        Login with Google
+      </van-button>
     </van-form>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import {
-  Button,
-  Field,
-  Form,
-} from 'vant';
+import firebase from 'firebase/app';
+import 'firebase/auth';
+import { Button, Field, Form } from 'vant';
 
 export default defineComponent({
+  components: {
+    'van-button': Button,
+    'van-field': Field,
+    'van-form': Form,
+  },
   data() {
     return {
       username: '',
@@ -35,24 +53,32 @@ export default defineComponent({
   },
   methods: {
     login() {
-      console.log('test');
+      firebase.auth();
     },
-  },
-  components: {
-    'van-button': Button,
-    'van-field': Field,
-    'van-form': Form,
+    loginWithGoogle() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      provider.addScope('profile');
+      provider.addScope('email');
+      firebase.auth().signInWithPopup(provider).then((result) => {
+        console.log(result);
+      });
+    },
   },
 });
 </script>
 
 <style lang="scss" scoped>
   .container {
-    min-width: 100vw;
-    min-height: 100vh;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    min-width: 100vw;
+    min-height: 100vh;
+  }
+
+  button + button {
+    margin-top: 20px;
   }
 
   form {

@@ -1,9 +1,13 @@
 <template>
-  <draggable class="dragArea list-group w-full" :list="list" @change="log">
+  <draggable
+    class="dragArea list-group w-full"
+    :list="list"
+    @change="log"
+  >
     <div
-      class=""
       v-for="element in list"
       :key="element.name"
+      class=""
     >
       {{ element.name }}
     </div>
@@ -32,6 +36,12 @@ import {
 } from 'vant';
 
 export default defineComponent({
+  components: {
+    'van-col': Col,
+    'van-button': Button,
+    'van-row': Row,
+    draggable: VueDraggableNext,
+  },
   data() {
     return {
       enabled: true,
@@ -48,12 +58,6 @@ export default defineComponent({
     log(event: CustomEvent) {
       console.log(event);
     },
-  },
-  components: {
-    'van-col': Col,
-    'van-button': Button,
-    'van-row': Row,
-    draggable: VueDraggableNext,
   },
 });
 </script>
