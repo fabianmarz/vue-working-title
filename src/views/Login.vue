@@ -1,86 +1,73 @@
 <template>
   <div class="container">
-    <van-form @submit="login">
-      <van-field
-        v-model="username"
-        name="Username"
-        placeholder="Username"
-        :rules="[{ required: true, message: 'Username is required' }]"
-      />
-      <van-field
-        v-model="password"
-        type="password"
-        name="Password"
-        placeholder="Password"
-        :rules="[{ required: true, message: 'Password is required' }]"
-      />
-      <van-button
-        type="primary"
-        block
-        native-type="submit"
-      >
-        Login
-      </van-button>
-      <van-button
-        icon="plus"
-        type="info"
-        block
-        @click="loginWithGoogle"
-      >
-        Login with Google
-      </van-button>
-    </van-form>
+    <p v-if="error">
+      {{ error.message }}
+    </p>
+    <el-form @submit="login">
+      <el-form-item>
+        <el-input
+          v-model="username"
+          name="Username"
+          placeholder="Username"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-input
+          v-model="password"
+          type="password"
+          name="Password"
+          placeholder="Password"
+          :rules="[{ required: true, message: 'Password is required' }]"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button
+          type="primary"
+          native-type="submit"
+        >
+          Login
+        </el-button>
+        <el-button
+          icon="el-icon-plus"
+          type="info"
+          @click="loginWithGoogle"
+        >
+          Login with Google
+        </el-button>
+      </el-form-item>
+    </el-form>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import firebase from 'firebase/app';
-import 'firebase/auth';
-import { Button, Field, Form } from 'vant';
+import { defineComponent, computed } from 'vue';
+import {
+  ElButton, ElInput, ElForm, ElFormItem,
+} from 'element-plus';
+
+import userAuth from '@/models/user/auth';
+import userLogin from '@/models/user/login';
 
 export default defineComponent({
   components: {
-    'van-button': Button,
-    'van-field': Field,
-    'van-form': Form,
+    ElButton,
+    ElInput,
+    ElForm,
+    ElFormItem,
   },
-  data() {
+  setup() {
+    const { error } = userAuth();
+    const loginState = userLogin();
+
     return {
-      username: '',
-      password: '',
+      ...loginState,
+      error: computed(() => (loginState.error || error).value),
     };
-  },
-  methods: {
-    login() {
-      firebase.auth();
-    },
-    loginWithGoogle() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      provider.addScope('profile');
-      provider.addScope('email');
-      firebase.auth().signInWithPopup(provider).then((result) => {
-        console.log(result);
-      });
-    },
   },
 });
 </script>
 
 <style lang="scss" scoped>
-  .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-width: 100vw;
-    min-height: 100vh;
-  }
-
-  button + button {
-    margin-top: 20px;
-  }
-
   form {
     width: 100%;
     max-width: 600px;

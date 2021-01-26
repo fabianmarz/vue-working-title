@@ -1,63 +1,60 @@
 <template>
-  <draggable
-    class="dragArea list-group w-full"
-    :list="list"
-    @change="log"
-  >
-    <div
-      v-for="element in list"
-      :key="element.name"
-      class=""
-    >
-      {{ element.name }}
+  <template v-if="loading">
+    LOADING…
+  </template>
+  <template v-if="user">
+    <single-list-add />
+    <hr>
+    <div class="lists-wrapper">
+      <single-list
+        v-for="list in collectionData"
+        :id="list.id"
+        :key="list.id"
+        :title="list.title"
+        :items="list.items"
+      />
     </div>
-  </draggable>
-  <van-row>
-    <van-col span="8">
-      <van-button>hello</van-button>
-    </van-col>
-    <van-col span="8">
-      <van-button>hello</van-button>
-    </van-col>
-    <van-col span="8">
-      <van-button>hello</van-button>
-    </van-col>
-  </van-row>
+  </template>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import { VueDraggableNext } from 'vue-draggable-next';
+import { defineComponent, onMounted } from 'vue';
 
-import {
-  Col,
-  Row,
-  Button,
-} from 'vant';
+import UserAuth from '@/models/user/auth';
+import Collection from '@/models/db/collection';
+
+import SingleListAdd from '@/components/SingleList/SingleListAdd.vue';
+import SingleList from '@/components/SingleList/SingleList.vue';
 
 export default defineComponent({
   components: {
-    'van-col': Col,
-    'van-button': Button,
-    'van-row': Row,
-    draggable: VueDraggableNext,
+    SingleListAdd,
+    SingleList,
   },
-  data() {
+  setup() {
+    const { user } = UserAuth();
+
+    const listsCollection = Collection('lists', {
+      onMount: true,
+    });
+
+    onMounted(() => {
+      listsCollection.getRealTimeCollection();
+    });
+
     return {
-      enabled: true,
-      list: [
-        { name: 'John', id: 1 },
-        { name: 'Joao', id: 2 },
-        { name: 'Jean', id: 3 },
-        { name: 'Gerard', id: 4 },
-      ],
-      dragging: false,
+      ...listsCollection,
+      user,
+      showForm: false,
+      lists: [],
     };
   },
-  methods: {
-    log(event: CustomEvent) {
-      console.log(event);
-    },
-  },
+
 });
 </script>
+
+<style lang="scss" scoped>
+  .lists-wrapper {
+    display: flex;
+  }
+</style>

@@ -9,4 +9,14 @@ module.exports = {
       }),
     ],
   },
+  css: {
+    loaderOptions: {
+      sass: {
+        prependData: `
+          @import '~/node_modules/element-plus/packages/theme-chalk/src/common/var';
+          @import '@/assets/scss/config.variables';
+        `,
+      },
+    },
+  },
 };

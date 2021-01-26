@@ -1,15 +1,15 @@
 import {
   createRouter,
   createWebHistory,
-  RouteLocationNormalized,
   RouteRecordRaw,
-  NavigationGuardNext,
 } from 'vue-router';
-import firebase from 'firebase/app';
-import 'firebase/auth';
+
+import { firebaseApp } from '@/models/user/auth';
+import userLogin from '@/models/user/login';
 
 const Login = () => import('../views/Login.vue');
 const Dashboard = () => import('../views/Dashboard.vue');
+const SingleListItemDetails = () => import('../views/SingleList/SingleListItemDetails.vue');
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -21,6 +21,26 @@ const routes: Array<RouteRecordRaw> = [
     path: '/',
     name: 'dashboard',
     component: Dashboard,
+  },
+  {
+    path: '/logout',
+    name: 'logout',
+    redirect: () => {
+      userLogin().logout();
+      return '/';
+    },
+  },
+  {
+    path: '/',
+    name: 'dashboard',
+    component: Dashboard,
+  },
+  // Item routes
+  {
+    path: '/list/:listId/item/:itemId/details',
+    name: 'SingleListItemDetails',
+    component: SingleListItemDetails,
+    props: true,
   },
 ];
 
@@ -35,20 +55,18 @@ const router = createRouter({
  *
  * Anonymous users are redirect to the login screen instead.
  */
-router.beforeEach((
-  to: RouteLocationNormalized,
-  from: RouteLocationNormalized,
-  next: NavigationGuardNext,
-) => {
-  firebase.auth().onAuthStateChanged((user: firebase.User | null) => {
-    const routeNames: Array<string> = ['login', 'register'];
-    const routeName: string = String(to.name);
+router.beforeEach((to, from, next) => {
+  firebaseApp.auth().onAuthStateChanged((user) => {
+    const routeNames = [
+      'login',
+      'register',
+    ];
+    const routeName = String(to.name);
     if (user && routeNames.includes(routeName)) {
-      next({
-        name: 'dashboard',
-      });
+      console.log(routeName);
+      return next({ name: 'dashboard' });
     }
-    next();
+    return next();
   });
 });
 
