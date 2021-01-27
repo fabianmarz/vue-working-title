@@ -5,7 +5,7 @@
   <template v-else>
     <el-form
       :model="documentData"
-      @submit.prevent="onSubmit"
+      @submit.prevent="submitForm"
     >
       <el-form-item label="Title">
         <el-input v-model="documentData.title" />
@@ -21,10 +21,14 @@
         <el-switch v-model="documentData.delivery" />
       </el-form-item>
       <el-form-item label="Instant delivery">
+        <el-progress
+          v-show="processing"
+          :percentage="progress"
+        />
         <el-upload
           action="#"
           multiple
-          :http-request="test"
+          :http-request="handleUpload"
           :file-list="fileList"
         >
           <el-button
@@ -45,11 +49,14 @@
           type="primary"
           native-type="submit"
         >
-          Create
+          Save
         </el-button>
-        <el-button>Cancel</el-button>
+        <el-button @click="$router.back()">
+          Back
+        </el-button>
       </el-form-item>
     </el-form>
+    {{ storageData }}
   </template>
 </template>
 
@@ -62,11 +69,13 @@ import {
   ElInput,
   ElSwitch,
   ElUpload,
+  ElProgress,
 } from 'element-plus';
+
+import { ElUploadRequestOptions } from 'element-plus/packages/upload/src/upload.type';
 
 import Document from '@/models/db/document';
 import Storage from '@/models/db/storage';
-import { ElUploadRequestOptions } from 'element-plus/packages/upload/src/upload.type';
 
 export default defineComponent({
   components: {
@@ -76,6 +85,7 @@ export default defineComponent({
     ElInput,
     ElSwitch,
     ElUpload,
+    ElProgress,
   },
   props: {
     listId: { type: String, required: true },
@@ -88,24 +98,27 @@ export default defineComponent({
       onMount: true,
     });
 
+    const storage = Storage({
+      path: props.listId,
+    });
+
     const fileList = reactive([]);
 
-    const onSubmit = () => {
+    const submitForm = () => {
       document.updateDocument(document.documentData.value);
     };
 
-    const test = (data: ElUploadRequestOptions) => {
-      console.log(typeof data, data);
+    const handleUpload = (data: ElUploadRequestOptions) => {
       const { file } = data;
-      const storage = Storage();
       storage.createFile(file);
     };
 
     return {
       ...document,
-      onSubmit,
-      test,
+      submitForm,
+      handleUpload,
       fileList,
+      ...storage,
     };
   },
 });
